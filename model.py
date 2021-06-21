@@ -50,6 +50,7 @@ recommend_df.drop_duplicates(
 )
 recommend_df.drop(columns=['reviews_date'], axis=1, inplace=True)
 
+recommend_df.to_pickle('./data/final_eda', compression='zip')
 map_products = recommend_df.drop_duplicates(subset='id',keep='first')[['id','name','categories']]
 recommend_df_master = recommend_df[['id','reviews_username','name','reviews_rating','user_sentiment']].copy()
 recommend_df_master['reviews'] = recommend_df['reviews_title'] + " " + recommend_df['reviews_text']
@@ -150,7 +151,7 @@ tfidf_vec = TfidfVectorizer(
     ngram_range=(1, 1)
 )
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state=seed)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state=42)
 
 ## Applying TF-IDF to extract train, test feature set
 tfidf_vec.fit(X_train)
@@ -159,11 +160,11 @@ X_test = tfidf_vec.transform(X_test)
 
 ## Applying SMOTE for imbalance data
 sm = SMOTE()
-X_train_smote, y_train_smote = sm.fit_sample(X_train, y_train)
-X_test_smote, y_test_smote = sm.fit_sample(X_test, y_test)
+X_train_smote, y_train_smote = sm.fit_resample(X_train, y_train)
+X_test_smote, y_test_smote = sm.fit_resample(X_test, y_test)
 
 ## Logistic Regression
-model = LogisticRegression(penalty="l2", random_state=seed, max_iter=500)
+model = LogisticRegression(penalty="l2", random_state=42, max_iter=500)
 
 ## Model fit
 model.fit(X_train_smote, y_train_smote)
@@ -253,8 +254,8 @@ for i in np.arange(0,20257):
     final_pred_df = final_pred_df.append(sorted_user_predictions)
 
 
-model = pickle.load(open('model.pkl', 'rb'))
-vectorizer = pickle.load(open('vectorizer.pkl', 'rb'))
+model = pickle.load(open('./models/model.pkl', 'rb'))
+vectorizer = pickle.load(open('./models/vectorizer.pkl', 'rb'))
 
 def getSentimentData(model, X):
     pred=model.predict(X)
@@ -318,5 +319,5 @@ user_correlation[user_correlation < 0]=0
 user_predicted_ratings = np.dot(user_correlation, df_pivot_user.fillna(0))
 user_final_rating = np.multiply(user_predicted_ratings,dummy_train)
 
-user_final_rating.to_pickle('user_rating',compression='zip')
-sentimentStats.to_pickle('sentiment_stats',compression='zip')
+user_final_rating.to_pickle('./data/user_rating',compression='zip')
+sentimentStats.to_pickle('./data/sentiment_stats',compression='zip')
