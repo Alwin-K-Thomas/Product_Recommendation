@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.devbridge-autocomplete/1.2.26/jquery.autocomplete.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='index.css') }}">
+</head>
+
+<body>
+    <div>
+        <h1 style="text-align:center">Ebuss Product Recommendation</h1>
+        <form action="/topProducts" method="post">
+            <p>Username:</p>
+            <p><input type="text" name="name" /></p>
+            <p><input type="submit" value="Predict" /></p>
+        </form>
+    </div>
+    <div>
+        {% if users is not none%}
+        <h1>List Of Users For Test Randomly Selected:</h1>
+        <ul>
+            {% for member in users: %}
+            <li>{{ member }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+    </div>
+    <div class=page align="center">
+        {% if username is not none %}
+        <h1>Top 5 Recommends for {{ username }}</h1>
+        {% for table in data %}
+        <h2>{{titles[loop.index]}}</h2>
+        {{ table|safe }} {% endfor %} {% endif %} {% if error is not none%}
+        <h1>{{ error }}</h1>
+        {% endif %}
+    </div>
+</body>
+
+</html>
